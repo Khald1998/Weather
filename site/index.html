@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- To display an HTML page correctly, a web browser must know the character set used in the page.  -->
+  <meta charset="utf-8">
+  <!-- It is Safari specific -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Page's icon -->
+  <link rel="icon" href="icons/favicon.ico">
+  <!-- Icons used in footer -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+  <!-- add Bootstrap to my project -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+  <!-- My css code -->
+  <link rel="stylesheet" href="css/master.css">  
+  <title>Khaled Alzahrani</title>
+</head>
+
+<body>
+
+	<div class="container py-5 h-100">
+
+		<div class="row d-flex justify-content-center align-items-center h-100">
+		  <div class="col-md-8 col-lg-6 col-xl-4">
+	
+			<h3 class="mb-4 pb-2 fw-normal">Check the weather forecast</h3>
+	
+			<div class="input-group rounded mb-3">
+			  <input type="search" class="form-control rounded" placeholder="City" aria-label="Search"
+				aria-describedby="search-addon" />
+			  <a href="#!" type="button">
+				<span class="input-group-text fw-bold" id="search-addon">
+				  Check!
+				</span>
+			  </a>
+			</div>
+	
+			<div class="mb-4 pb-2">
+			  <div class="form-check form-check-inline">
+				<input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1"
+				  value="option1" checked />
+				<label class="form-check-label" for="inlineRadio1">Celsius</label>
+			  </div>
+	
+			  <div class="form-check form-check-inline">
+				<input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2"
+				  value="option2" />
+				<label class="form-check-label" for="inlineRadio2">Farenheit</label>
+			  </div>
+			</div>
+	
+			<div class="card shadow-0 border">
+			  <div class="card-body p-4">
+	
+				<h4 class="mb-1 sfw-normal">New York, US</h4>
+				<p class="mb-2">Current temperature: <strong>5.42°C</strong></p>
+				<p>Feels like: <strong>4.37°C</strong></p>
+				<p>Max: <strong>6.11°C</strong>, Min: <strong>3.89°C</strong></p>
+	
+				<div class="d-flex flex-row align-items-center">
+				  <p class="mb-0 me-4">Scattered Clouds</p>
+				  <i class="fas fa-cloud fa-3x" style="color: #eee;"></i>
+				</div>
+	
+			  </div>
+			</div>
+	
+		  </div>
+		</div>
+	
+	  </div>
+  <!-- <script>alert("I am still working in the website");</script> -->
+  <!-- Include every Bootstrap JavaScript plugin and dependency with one of our two bundles. Both bootstrap.bundle.js and bootstrap.bundle.min.js include Popper for our tooltips and popovers -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>
