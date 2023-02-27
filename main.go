@@ -7,6 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type htmlvar struct {
+	city string
+}
+
 func main() {
 	router := gin.Default()
 	const ContentTypeHTML = "./site/*"
@@ -17,8 +21,10 @@ func main() {
 }
 
 func home(c *gin.Context) {
-
-	c.HTML(http.StatusOK, "index.html", map[string]string{"title": "home page"})
+	varToPass := gin.H{
+		"city": "al dhahran",
+	}
+	c.HTML(http.StatusOK, "index.html", varToPass)
 	fmt.Println(c.Writer)
 
 }
