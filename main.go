@@ -1,14 +1,14 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-type htmlvar struct {
-	city string
+type Body struct {
+	City string `json:"City"`
 }
 
 func main() {
@@ -16,15 +16,26 @@ func main() {
 	const ContentTypeHTML = "./site/*"
 	router.LoadHTMLGlob(ContentTypeHTML)
 	router.GET("/", home)
+	router.POST("/search", search)
 
 	router.Run("localhost:8080")
 }
 
-func home(c *gin.Context) {
+func home(x *gin.Context) {
+
+	x.HTML(http.StatusOK, "index.html", nil)
+	log.Println(x.Request.Body)
+
+}
+func search(x *gin.Context) {
+	x.Request.ParseForm()
+	log.Println(x.Request.Form)
+	data := x.Request.FormValue("City")
+
 	varToPass := gin.H{
-		"city": "al dhahran",
+		"City": data,
 	}
-	c.HTML(http.StatusOK, "index.html", varToPass)
-	fmt.Println(c.Writer)
+
+	x.HTML(http.StatusOK, "results.html", varToPass)
 
 }
