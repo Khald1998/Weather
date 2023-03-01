@@ -1,17 +1,14 @@
 package main
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"text/template"
 
 	"github.com/gin-gonic/gin"
+	"github.com/tidwall/gjson"
 )
-
-type Body struct {
-	City string `json:"City"`
-}
 
 func main() {
 	router := gin.Default()
@@ -23,37 +20,44 @@ func main() {
 	router.Run("localhost:8080")
 }
 
-func home(x *gin.Context) {
+func home(x *gin.Context) { x.HTML(http.StatusOK, "index.html", nil) }
 
-	x.HTML(http.StatusOK, "index.html", nil)
-	log.Println(x.Request.Body)
-
-}
 func search(x *gin.Context) {
 	x.Request.ParseForm()
 	log.Println(x.Request.Form)
 	data := x.Request.FormValue("City")
 	fitchData := getData(data)
-	log.Println("-------------------------------------")
-	foomapone := fitchData["main"]
-	temp := foomapone.(map[string]interface{})
-	foomaptwo := fitchData["weather"]
-	state := foomaptwo.([]map[string]interface{})
+	temperature := gjson.Get(fitchData, "main.temp")
+	feels_like := gjson.Get(fitchData, "main.feels_like")
+	Max := gjson.Get(fitchData, "main.temp_max")
+	Min := gjson.Get(fitchData, "main.temp_min")
+	weather := gjson.Get(fitchData, "weather.0.main")
+	weather_description := gjson.Get(fitchData, "weather.0.description")
+	weather_icon := gjson.Get(fitchData, "weather.0.icon")
 
-	log.Println(state[0])
-	log.Println("-------------------------------------")
+	templ, err := template.ParseFiles("./site/results.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = templ.Execute(x.Writer, weather_icon.String())
+	if err != nil {
+		log.Println("Error = ", err)
+	}
+	log.Println("weather is ", weather.String())
 	varToPass := gin.H{
-		"City":        data,
-		"temperature": temp["temp"],
-		"feels_like":  temp["feels_like"],
-		"Max":         temp["temp_max"],
-		"Min":         temp["temp_min"],
+		"City":                data,
+		"temperature":         temperature.String(),
+		"feels_like":          feels_like.String(),
+		"Max":                 Max.String(),
+		"Min":                 Min.String(),
+		"weather":             weather.String(),
+		"weather_description": weather_description.String(),
 	}
 
 	x.HTML(http.StatusOK, "results.html", varToPass)
 
 }
-func getData(c string) map[string]interface{} {
+func getData(c string) string {
 	posturl := "https://api.openweathermap.org/data/2.5/weather"
 	city := c
 	API := "51c242b3396833f6078589fc5411066e"
@@ -68,14 +72,11 @@ func getData(c string) map[string]interface{} {
 	if err != nil {
 		log.Printf("client: error making http request: %s\n", err)
 	}
+
 	resBody, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		log.Printf("client: could not read response body: %s\n", err)
 	}
-	var jsonRes map[string]interface{}    // declaring a map for key names as string and values as interface
-	_ = json.Unmarshal(resBody, &jsonRes) // Unmarshalling
-
-	log.Println(jsonRes)
-	return jsonRes
+	return string(resBody)
 
 }
