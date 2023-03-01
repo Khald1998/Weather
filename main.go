@@ -1,10 +1,10 @@
 package main
 
 import (
+	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"text/template"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tidwall/gjson"
@@ -34,15 +34,19 @@ func search(x *gin.Context) {
 	weather := gjson.Get(fitchData, "weather.0.main")
 	weather_description := gjson.Get(fitchData, "weather.0.description")
 	weather_icon := gjson.Get(fitchData, "weather.0.icon")
+	// --------------------------------------------------------------------
 
 	templ, err := template.ParseFiles("./site/results.html")
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Error = ", err)
 	}
 	err = templ.Execute(x.Writer, weather_icon.String())
 	if err != nil {
 		log.Println("Error = ", err)
 	}
+
+	// --------------------------------------------------------------------
+
 	log.Println("weather is ", weather.String())
 	varToPass := gin.H{
 		"City":                data,
