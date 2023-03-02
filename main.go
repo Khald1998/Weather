@@ -30,35 +30,36 @@ func search(c *gin.Context) {
 	if City_name == "" {
 		City_name = randomdata.City()
 	}
-
+	var temperature, feels_like, Max, Min, weather, weather_description, weather_icon string
 	Data := getData(City_name)
 	if gjson.Get(Data, "cod").String() == "200" {
-		temperature := gjson.Get(Data, "main.temp")
-		feels_like := gjson.Get(Data, "main.feels_like")
-		Max := gjson.Get(Data, "main.temp_max")
-		Min := gjson.Get(Data, "main.temp_min")
-		weather := gjson.Get(Data, "weather.0.main")
-		weather_description := gjson.Get(Data, "weather.0.description")
-		weather_icon := gjson.Get(Data, "weather.0.icon")
+		temperature = gjson.Get(Data, "main.temp").String()
+		feels_like = gjson.Get(Data, "main.feels_like").String()
+		Max = gjson.Get(Data, "main.temp_max").String()
+		Min = gjson.Get(Data, "main.temp_min").String()
+		weather = gjson.Get(Data, "weather.0.main").String()
+		weather_description = gjson.Get(Data, "weather.0.description").String()
+		weather_icon = gjson.Get(Data, "weather.0.icon").String()
 	} else {
-		temperature := gjson.Get(Data, "main.temp")
-		feels_like := gjson.Get(Data, "main.feels_like")
-		Max := gjson.Get(Data, "main.temp_max")
-		Min := gjson.Get(Data, "main.temp_min")
-		weather := gjson.Get(Data, "weather.0.main")
-		weather_description := gjson.Get(Data, "weather.0.description")
-		weather_icon := gjson.Get(Data, "weather.0.icon")
+		City_name = gjson.Get(Data, "message").String()
+		temperature = "No data"
+		feels_like = "No data"
+		Max = "No data"
+		Min = "No data"
+		weather = "No data"
+		weather_description = "No data"
+		weather_icon = "No data"
 	}
 
 	varToPass := gin.H{
 		"City":                City_name,
-		"Temperature":         temperature.String(),
-		"Feels_like":          feels_like.String(),
-		"Max":                 Max.String(),
-		"Min":                 Min.String(),
-		"Weather":             weather.String(),
-		"Weather_description": weather_description.String(),
-		"Icon":                weather_icon.String(),
+		"Temperature":         temperature,
+		"Feels_like":          feels_like,
+		"Max":                 Max,
+		"Min":                 Min,
+		"Weather":             weather,
+		"Weather_description": weather_description,
+		"Icon":                weather_icon,
 	}
 
 	c.HTML(http.StatusOK, "results.html", varToPass)
