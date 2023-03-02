@@ -101,13 +101,13 @@
 							<div class="card-body p-4">
 				  
 							  <h4 class="mb-1 sfw-normal">{{.City}}</h4>
-							  <p class="mb-2">Current temperature: <strong>{{.temperature}}°C</strong></p>
-							  <p>Feels like: <strong>{{.feels_like}}°C</strong></p>
+							  <p class="mb-2">Current temperature: <strong>{{.Temperature}}°C</strong></p>
+							  <p>Feels like: <strong>{{.Feels_like}}°C</strong></p>
 							  <p>Max: <strong>{{.Max}}°C</strong>, Min: <strong>{{.Min}}°C</strong></p>
 				  
 							  <div class="d-flex flex-row align-items-center">
-								<p class="mb-0 me-4">{{.weather}} : {{.weather_description}}</p>
-								<div class="weather-icon"><img src="http://openweathermap.org/img/w/10d.png" /></div>
+								<p class="mb-0 me-4">{{.Weather}} : {{.Weather_description}}</p>
+								<div class="weather-icon"><img src="http://openweathermap.org/img/w/{{.Icon}}.png" /></div>
 								<i class="fas fa-cloud fa-3x" style="color: #eee;"></i>
 							  </div>
 				  

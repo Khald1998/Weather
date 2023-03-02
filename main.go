@@ -1,11 +1,11 @@
 package main
 
 import (
-	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
 
+	"github.com/Pallinder/go-randomdata"
 	"github.com/gin-gonic/gin"
 	"github.com/tidwall/gjson"
 )
@@ -20,45 +20,48 @@ func main() {
 	router.Run("localhost:8080")
 }
 
-func home(x *gin.Context) { x.HTML(http.StatusOK, "index.html", nil) }
+func home(c *gin.Context) {
+	c.HTML(http.StatusOK, "index.html", nil)
+}
 
-func search(x *gin.Context) {
-	x.Request.ParseForm()
-	log.Println(x.Request.Form)
-	data := x.Request.FormValue("City")
-	fitchData := getData(data)
-	temperature := gjson.Get(fitchData, "main.temp")
-	feels_like := gjson.Get(fitchData, "main.feels_like")
-	Max := gjson.Get(fitchData, "main.temp_max")
-	Min := gjson.Get(fitchData, "main.temp_min")
-	weather := gjson.Get(fitchData, "weather.0.main")
-	weather_description := gjson.Get(fitchData, "weather.0.description")
-	weather_icon := gjson.Get(fitchData, "weather.0.icon")
-	// --------------------------------------------------------------------
-
-	templ, err := template.ParseFiles("./site/results.html")
-	if err != nil {
-		log.Println("Error = ", err)
-	}
-	err = templ.Execute(x.Writer, weather_icon.String())
-	if err != nil {
-		log.Println("Error = ", err)
+func search(c *gin.Context) {
+	c.Request.ParseForm()
+	City_name := c.Request.FormValue("City")
+	if City_name == "" {
+		City_name = randomdata.City()
 	}
 
-	// --------------------------------------------------------------------
+	Data := getData(City_name)
+	if gjson.Get(Data, "cod").String() == "200" {
+		temperature := gjson.Get(Data, "main.temp")
+		feels_like := gjson.Get(Data, "main.feels_like")
+		Max := gjson.Get(Data, "main.temp_max")
+		Min := gjson.Get(Data, "main.temp_min")
+		weather := gjson.Get(Data, "weather.0.main")
+		weather_description := gjson.Get(Data, "weather.0.description")
+		weather_icon := gjson.Get(Data, "weather.0.icon")
+	} else {
+		temperature := gjson.Get(Data, "main.temp")
+		feels_like := gjson.Get(Data, "main.feels_like")
+		Max := gjson.Get(Data, "main.temp_max")
+		Min := gjson.Get(Data, "main.temp_min")
+		weather := gjson.Get(Data, "weather.0.main")
+		weather_description := gjson.Get(Data, "weather.0.description")
+		weather_icon := gjson.Get(Data, "weather.0.icon")
+	}
 
-	log.Println("weather is ", weather.String())
 	varToPass := gin.H{
-		"City":                data,
-		"temperature":         temperature.String(),
-		"feels_like":          feels_like.String(),
+		"City":                City_name,
+		"Temperature":         temperature.String(),
+		"Feels_like":          feels_like.String(),
 		"Max":                 Max.String(),
 		"Min":                 Min.String(),
-		"weather":             weather.String(),
-		"weather_description": weather_description.String(),
+		"Weather":             weather.String(),
+		"Weather_description": weather_description.String(),
+		"Icon":                weather_icon.String(),
 	}
 
-	x.HTML(http.StatusOK, "results.html", varToPass)
+	c.HTML(http.StatusOK, "results.html", varToPass)
 
 }
 func getData(c string) string {
