@@ -5,86 +5,124 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Pallinder/go-randomdata"
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/tidwall/gjson"
 )
 
-func main() {
-	router := gin.Default()
-	const ContentTypeHTML = "./site/*"
-	router.LoadHTMLGlob(ContentTypeHTML)
-	router.GET("/", home)
-	router.POST("/search", search)
+// Define constants for various values used throughout the code
+const (
+	contentTypeHTML = "./site/*"                                        // Path to HTML templates directory
+	openWeatherAPI  = "https://api.openweathermap.org/data/2.5/weather" // OpenWeather API URL
+	apiKey          = "51c242b3396833f6078589fc5411066e"                // API key for OpenWeather API
+	addr            = "localhost:8080"                                  // Server address
+)
 
-	router.Run("localhost:8080")
+// Setup the Gin router with necessary routes and middleware
+func setupRouter() *gin.Engine {
+	router := gin.Default() // Create a new Gin router instance with default middleware
+
+	router.LoadHTMLGlob(contentTypeHTML) // Load HTML templates from the specified directory
+
+	// Serve static files from the specified directory under the "/static" route
+	router.Use(static.Serve("/static", static.LocalFile("./static", true)))
+
+	// Add handlers for the root path, the "Search" path and the "Results" path
+	router.GET("/", home)
+	router.GET("/Search", Search)
+	router.POST("/Results", Results)
+
+	return router // Return the configured router instance
+}
+
+// Start the server
+func main() {
+	router := setupRouter() // Set up the Gin router
+
+	err := router.Run(addr) // Start the server
+	if err != nil {
+		log.Fatalf("Failed to start server: %v", err) // If the server fails to start, log the error and exit
+	}
 }
 
 func home(c *gin.Context) {
-	c.HTML(http.StatusOK, "index.html", nil)
+	c.HTML(http.StatusOK, "Main.html", nil)
+}
+func Search(c *gin.Context) {
+	c.HTML(http.StatusOK, "Search.html", nil)
 }
 
-func search(c *gin.Context) {
+func Results(c *gin.Context) {
 	c.Request.ParseForm()
 	City_name := c.Request.FormValue("City")
-	if City_name == "" {
-		City_name = randomdata.City()
+	if len(City_name) == 0 {
+		c.HTML(http.StatusBadRequest, "error.html", gin.H{
+			"message": "City name is missing",
+		})
+		return
 	}
-	var temperature, feels_like, Max, Min, weather, weather_description, weather_icon string
-	Data := getData(City_name)
-	if gjson.Get(Data, "cod").String() == "200" {
-		temperature = gjson.Get(Data, "main.temp").String()
-		feels_like = gjson.Get(Data, "main.feels_like").String()
-		Max = gjson.Get(Data, "main.temp_max").String()
-		Min = gjson.Get(Data, "main.temp_min").String()
-		weather = gjson.Get(Data, "weather.0.main").String()
-		weather_description = gjson.Get(Data, "weather.0.description").String()
-		weather_icon = gjson.Get(Data, "weather.0.icon").String()
-	} else {
-		City_name = gjson.Get(Data, "message").String()
-		temperature = "No data"
-		feels_like = "No data"
-		Max = "No data"
-		Min = "No data"
-		weather = "No data"
-		weather_description = "No data"
-		weather_icon = "No data"
+
+	var temperature, feelsLike, maxTemp, minTemp, weather, weatherDesc, weatherIcon string
+	data := getData(City_name)
+
+	if gjson.Get(data, "cod").String() != "200" {
+		c.HTML(http.StatusBadRequest, "error.html", gin.H{
+			"message": gjson.Get(data, "message").String(),
+		})
+		return
 	}
+	temperature = gjson.Get(data, "main.temp").String()
+	feelsLike = gjson.Get(data, "main.feels_like").String()
+	maxTemp = gjson.Get(data, "main.temp_max").String()
+	minTemp = gjson.Get(data, "main.temp_min").String()
+	weather = gjson.Get(data, "weather.0.main").String()
+	weatherDesc = gjson.Get(data, "weather.0.description").String()
+	weatherIcon = gjson.Get(data, "weather.0.icon").String()
 
 	varToPass := gin.H{
 		"City":                City_name,
 		"Temperature":         temperature,
-		"Feels_like":          feels_like,
-		"Max":                 Max,
-		"Min":                 Min,
+		"Feels_like":          feelsLike,
+		"Max":                 maxTemp,
+		"Min":                 minTemp,
 		"Weather":             weather,
-		"Weather_description": weather_description,
-		"Icon":                weather_icon,
+		"Weather_description": weatherDesc,
+		"Icon":                weatherIcon,
 	}
 
-	c.HTML(http.StatusOK, "results.html", varToPass)
+	c.HTML(http.StatusOK, "Results.html", varToPass)
 
 }
-func getData(c string) string {
-	posturl := "https://api.openweathermap.org/data/2.5/weather"
-	city := c
-	API := "51c242b3396833f6078589fc5411066e"
-	url := posturl + "?q=" + city + "&appid=" + API
 
+func getData(city string) string {
+	// Define the base URL for the OpenWeatherMap API
+	// Construct the URL for the API request
+	url := openWeatherAPI + "?q=" + city + "&appid=" + apiKey
+
+	// Create a new GET request with the constructed URL
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	res, err := http.DefaultClient.Do(req)
+	// Create a new HTTP client to make the request
+	client := &http.Client{}
+
+	// Send the request and store the response in 'resp'
+	resp, err := client.Do(req)
 	if err != nil {
-		log.Printf("client: error making http request: %s\n", err)
+		log.Fatal(err)
 	}
 
-	resBody, err := ioutil.ReadAll(res.Body)
+	// Defer closing the response body until the function returns
+	defer resp.Body.Close()
+
+	// Read the response body into a byte slice
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Printf("client: could not read response body: %s\n", err)
+		log.Fatal(err)
 	}
-	return string(resBody)
 
+	// Convert the byte slice to a string and return it
+	return string(body)
 }
