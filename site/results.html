@@ -5,8 +5,6 @@
 	<meta charset="utf-8">
 	<!-- It is Safari specific -->
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<!-- Page's icon -->
-	<link rel="icon" href="icons/favicon.ico">
 	<!-- Icons used in footer -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
 	<!-- add Bootstrap to my project -->
@@ -41,16 +39,9 @@
 
 
 
+        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 			
-		<div class="container">
-			<div class="row text-center ">
-				<div class="col-md-8 col-lg-6 col-xl-4 w-100 mt-5">
-					<h1>A test website that bring you whether state in a city you search</h1>
-					<p class="lead">A complete project for front-end and back-end</p>
-					<p>Made by Bootstrap v5.1.3</p>
-				</div>
-			</div>
-			<br/>
+		<div class="container mt-3">
 			<div class="row align-middle d-flex justify-content-center align-items-center h-100"> 
 				<div class="col-12 col-md-10 col-lg-8">
 					<form class="card card-sm" action="/Results" method="post">
@@ -62,7 +53,10 @@
 								<input class="form-control form-control-lg form-control-borderless" type="search" placeholder="Search the name of the city" name="City">
 							</div>
 							<div class="col-auto">
-								<button class="btn btn-lg btn-success btn-dark" type="submit">Search</button>
+								<button class="btn btn-lg btn-success btn-dark" type="submit" name="button" value="Search">Search</button>
+							</div>
+							<div class="col-auto">
+								<button class="btn btn-lg btn-success btn-dark" type="submit" name="button" value="Random">Random</button>
 							</div>
 						</div>
 					</form>
@@ -74,14 +68,14 @@
 					<div class="col-md-8 col-lg-6 col-xl-4">
 						<div class="mb-4 pb-2">
 							<div class="form-check form-check-inline">
-							  <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1"
-								value="option1" checked />
+							  <input class="form-check-input" type="radio" name="temperature" id="celsius"
+								value="celsius" checked />
 							  <label class="form-check-label" for="inlineRadio1">Celsius</label>
 							</div>
 				  
 							<div class="form-check form-check-inline">
-							  <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2"
-								value="option2" />
+							  <input class="form-check-input" type="radio" name="temperature" id="fahrenheit"
+								value="fahrenheit" />
 							  <label class="form-check-label" for="inlineRadio2">Farenheit</label>
 							</div>
 						  </div>
@@ -93,9 +87,9 @@
 							<div class="card-body p-4">
 				  
 							  <h4 class="mb-1 sfw-normal">{{.City}}</h4>
-							  <p class="mb-2">Current temperature: <strong>{{.Temperature}}°C</strong></p>
-							  <p>Feels like: <strong>{{.Feels_like}}°C</strong></p>
-							  <p>Max: <strong>{{.Max}}°C</strong>, Min: <strong>{{.Min}}°C</strong></p>
+							  <p class="mb-2">Current temperature: <strong id="temperature-header">{{.Temperature}}°C</strong></p>
+							  <p>Feels like: <strong id="temperature-Feel">{{.Feels_like}}°C</strong></p>
+							  <p>Max: <strong id="temperature-Max">{{.Max}}°C</strong>, Min: <strong id="temperature-Min">{{.Min}}°C</strong></p>
 				  
 							  <div class="d-flex flex-row align-items-center">
 								<p class="mb-0 me-4">{{.Weather}} : {{.Weather_description}}</p>
@@ -138,6 +132,54 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
     crossorigin="anonymous"></script>
+	<script>
+        const tempHeader = document.getElementById("temperature-header");
+		const tempMax = document.getElementById("temperature-Max");
+		const tempMin = document.getElementById("temperature-Min");
+		const tempFeel = document.getElementById("temperature-Feel");
+
+        const celsiusRadio = document.getElementById("celsius");
+        const fahrenheitRadio = document.getElementById("fahrenheit");
+
+        const temp = parseFloat("{{.Temperature}}");
+		const Max = parseFloat("{{.Max}}");
+        const Min = parseFloat("{{.Min}}");
+        const Feel = parseFloat("{{.Feels_like}}");
+
+    
+        function convertToFahrenheit(celsius) {
+            return (celsius * 9/5) + 32;
+        }
+    
+        function convertToCelsius(fahrenheit) {
+            return (fahrenheit - 32) * 5/9;
+        }
+    
+        function updateTemp() {
+            if (celsiusRadio.checked) {
+                tempHeader.textContent = `${temp.toFixed(2)}°C`;
+				tempMax.textContent = `${Max.toFixed(2)}°C`;
+                tempMin.textContent = `${Min.toFixed(2)}°C`;
+                tempFeel.textContent = `${Feel.toFixed(2)}°C`;
+
+            } else if (fahrenheitRadio.checked) {
+                const fahrenheitTemp = convertToFahrenheit(temp);
+				const fahrenheitMax = convertToFahrenheit(Max);
+                const fahrenheitMin = convertToFahrenheit(Min);
+                const fahrenheitFeel = convertToFahrenheit(Feel);
+
+                tempHeader.textContent = `${fahrenheitTemp.toFixed(2)}°F`;
+				tempMax.textContent = `${fahrenheitMax.toFixed(2)}°F`;
+                tempMin.textContent = `${fahrenheitMin.toFixed(2)}°F`;
+                tempFeel.textContent = `${fahrenheitFeel.toFixed(2)}°F`;
+            }
+        }
+    
+        celsiusRadio.addEventListener("change", updateTemp);
+        fahrenheitRadio.addEventListener("change", updateTemp);
+    
+        updateTemp();
+    </script>
 </body>
 
 </html>

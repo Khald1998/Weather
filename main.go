@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Pallinder/go-randomdata"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/tidwall/gjson"
@@ -28,9 +29,9 @@ func setupRouter() *gin.Engine {
 	router.Use(static.Serve("/static", static.LocalFile("./static", true)))
 
 	// Add handlers for the root path, the "Search" path and the "Results" path
-	router.GET("/", home)
-	router.GET("/Search", Search)
-	router.POST("/Results", Results)
+	router.GET("/", homePage)
+	router.GET("/Search", SearchPage)
+	router.POST("/Results", ResultsPage)
 
 	return router // Return the configured router instance
 }
@@ -45,16 +46,45 @@ func main() {
 	}
 }
 
-func home(c *gin.Context) {
+func homePage(c *gin.Context) {
 	c.HTML(http.StatusOK, "Main.html", nil)
+
 }
-func Search(c *gin.Context) {
+func SearchPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "Search.html", nil)
+
 }
 
-func Results(c *gin.Context) {
+func ResultsPage(c *gin.Context) {
+
 	c.Request.ParseForm()
 	City_name := c.Request.FormValue("City")
+	if c.Request.FormValue("button") == "Search" {
+		Search(City_name, c)
+	} else if c.Request.FormValue("button") == "Random" {
+		Random(c)
+	}
+}
+func Random(c *gin.Context) {
+	City_name := randomdata.City()
+	data := getData(City_name)
+	if gjson.Get(data, "message").String() != "" {
+		// loop that runs infinitely
+		for {
+			City_name = randomdata.City()
+			data = getData(City_name)
+			// condition to terminate the loop
+			if gjson.Get(data, "message").String() == "" {
+				break
+			}
+		}
+		Search(City_name, c)
+	} else {
+		Search(City_name, c)
+	}
+
+}
+func Search(City_name string, c *gin.Context) {
 	if len(City_name) == 0 {
 		c.HTML(http.StatusBadRequest, "error.html", gin.H{
 			"message": "City name is missing",
@@ -62,7 +92,6 @@ func Results(c *gin.Context) {
 		return
 	}
 
-	var temperature, feelsLike, maxTemp, minTemp, weather, weatherDesc, weatherIcon string
 	data := getData(City_name)
 
 	if gjson.Get(data, "cod").String() != "200" {
@@ -71,33 +100,25 @@ func Results(c *gin.Context) {
 		})
 		return
 	}
-	temperature = gjson.Get(data, "main.temp").String()
-	feelsLike = gjson.Get(data, "main.feels_like").String()
-	maxTemp = gjson.Get(data, "main.temp_max").String()
-	minTemp = gjson.Get(data, "main.temp_min").String()
-	weather = gjson.Get(data, "weather.0.main").String()
-	weatherDesc = gjson.Get(data, "weather.0.description").String()
-	weatherIcon = gjson.Get(data, "weather.0.icon").String()
 
 	varToPass := gin.H{
 		"City":                City_name,
-		"Temperature":         temperature,
-		"Feels_like":          feelsLike,
-		"Max":                 maxTemp,
-		"Min":                 minTemp,
-		"Weather":             weather,
-		"Weather_description": weatherDesc,
-		"Icon":                weatherIcon,
+		"Temperature":         gjson.Get(data, "main.temp").String(),
+		"Feels_like":          gjson.Get(data, "main.feels_like").String(),
+		"Max":                 gjson.Get(data, "main.temp_max").String(),
+		"Min":                 gjson.Get(data, "main.temp_min").String(),
+		"Weather":             gjson.Get(data, "weather.0.main").String(),
+		"Weather_description": gjson.Get(data, "weather.0.description").String(),
+		"Icon":                gjson.Get(data, "weather.0.icon").String(),
 	}
 
 	c.HTML(http.StatusOK, "Results.html", varToPass)
 
 }
-
 func getData(city string) string {
 	// Define the base URL for the OpenWeatherMap API
 	// Construct the URL for the API request
-	url := openWeatherAPI + "?q=" + city + "&appid=" + apiKey
+	url := openWeatherAPI + "?q=" + city + "&appid=" + apiKey + "&units=metric"
 
 	// Create a new GET request with the constructed URL
 	req, err := http.NewRequest("GET", url, nil)
