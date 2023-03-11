@@ -12,7 +12,7 @@
 	<title> weather forecast </title>
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100">
         <!-- Responsive navbar-->
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
@@ -41,21 +41,18 @@
 
         <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 			
-		<div class="container mt-3">
+		<div class="container mt-3 mb-5">
 			<div class="row align-middle d-flex justify-content-center align-items-center h-100"> 
 				<div class="col-12 col-md-10 col-lg-8">
 					<form class="card card-sm" action="/Results" method="post">
 						<div class="card-body row no-gutters align-items-center">
-							<div class="col-auto">
-								<i class="fas fa-search h4 text-body"></i>
-							</div>
-							<div class="col">
+							<div class="col-12 col-lg">
 								<input class="form-control form-control-lg form-control-borderless" type="search" placeholder="Search the name of the city" name="City">
 							</div>
-							<div class="col-auto">
+							<div class="col-12 text-center mt-3 col-lg-auto mt-lg-0">
 								<button class="btn btn-lg btn-success btn-dark" type="submit" name="button" value="Search">Search</button>
 							</div>
-							<div class="col-auto">
+							<div class="col-12 text-center mt-3 col-lg-auto mt-lg-0">
 								<button class="btn btn-lg btn-success btn-dark" type="submit" name="button" value="Random">Random</button>
 							</div>
 						</div>
@@ -66,7 +63,7 @@
 				
 				<div class="row pt-5 align-middle d-flex justify-content-center align-items-center h-100">
 					<div class="col-md-8 col-lg-6 col-xl-4">
-						<div class="mb-4 pb-2">
+						<div class="mb-4 pb-2 text-center">
 							<div class="form-check form-check-inline">
 							  <input class="form-check-input" type="radio" name="temperature" id="celsius"
 								value="celsius" checked />
@@ -105,7 +102,7 @@
 			</div>
 
 
-	  <footer class="text-center text-lg-start bg-dark footer fixed-bottom">
+	  <footer class="text-center text-lg-start bg-dark footer mt-auto ">
 		<div class="container d-flex justify-content-center py-5">
 		  <button type="button" class="btn btn-dark btn-lg btn-floating mx-2" >
 			  <a class="text-white" href="https://twitter.com/KhaledALz1998"><i class="icon ion-social-twitter"></i></a>
